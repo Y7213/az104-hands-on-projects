@@ -1,0 +1,19 @@
+{
+  "rules": [
+    {
+      "name": "age-out-taxrecords",
+      "enabled": true,
+      "type": "Lifecycle",
+      "definition": {
+        "filters": { "blobTypes": ["blockBlob"], "prefixMatch": ["taxrecords/"] },
+        "actions": {
+          "baseBlob": {
+            "tierToCool": { "daysAfterModificationGreaterThan": 30 },
+            "tierToArchive": { "daysAfterModificationGreaterThan": 180 },
+            "delete": { "daysAfterModificationGreaterThan": 2555 }
+          }
+        }
+      }
+    }
+  ]
+}

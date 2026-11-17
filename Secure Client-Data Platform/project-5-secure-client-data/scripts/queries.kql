@@ -1,0 +1,13 @@
+// Blob access in the last 2 hours, excluding change-feed housekeeping noise
+StorageBlobLogs
+| where TimeGenerated > ago(2h)
+| where AuthenticationType in ("OAuth", "SAS")
+| where Uri !contains "blobchangefeed"
+| project TimeGenerated, OperationName, StatusCode, AuthenticationType, CallerIpAddress, Uri
+| order by TimeGenerated desc
+
+// Denied requests (403 = auth/network block)
+StorageBlobLogs
+| where TimeGenerated > ago(24h) and StatusCode == 403
+| summarize attempts = count() by CallerIpAddress, AuthenticationType, StatusText
+| order by attempts desc
