@@ -1,0 +1,1824 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "loadBalancers_plb_p3_name": {
+            "defaultValue": "plb-p3",
+            "type": "String"
+        },
+        "virtualMachines_vm_db_name": {
+            "defaultValue": "vm-db",
+            "type": "String"
+        },
+        "virtualMachines_vm_app_name": {
+            "defaultValue": "vm-app",
+            "type": "String"
+        },
+        "virtualMachines_web_vm1_name": {
+            "defaultValue": "web-vm1",
+            "type": "String"
+        },
+        "virtualMachines_web_vm2_name": {
+            "defaultValue": "web-vm2",
+            "type": "String"
+        },
+        "virtualNetworks_P3_Vnet_name": {
+            "defaultValue": "P3_Vnet",
+            "type": "String"
+        },
+        "natGateways_NAT_project3_name": {
+            "defaultValue": "NAT-project3",
+            "type": "String"
+        },
+        "loadBalancers_internal_lb_name": {
+            "defaultValue": "internal-lb",
+            "type": "String"
+        },
+        "networkInterfaces_vm_db22_name": {
+            "defaultValue": "vm-db22",
+            "type": "String"
+        },
+        "publicIPAddresses_nat_pip_name": {
+            "defaultValue": "nat-pip",
+            "type": "String"
+        },
+        "networkInterfaces_vm_app298_name": {
+            "defaultValue": "vm-app298",
+            "type": "String"
+        },
+        "networkInterfaces_web_vm1462_name": {
+            "defaultValue": "web-vm1462",
+            "type": "String"
+        },
+        "networkInterfaces_web_vm2475_name": {
+            "defaultValue": "web-vm2475",
+            "type": "String"
+        },
+        "networkSecurityGroups_nsg_db_name": {
+            "defaultValue": "nsg-db",
+            "type": "String"
+        },
+        "publicIPAddresses_pip_web_p3_name": {
+            "defaultValue": "pip-web-p3",
+            "type": "String"
+        },
+        "vaults_vm_db_backup_name": {
+            "defaultValue": "vm-db-backup",
+            "type": "String"
+        },
+        "bastionHosts_project3_bastion_name": {
+            "defaultValue": "project3-bastion",
+            "type": "String"
+        },
+        "networkSecurityGroups_nsg_app_name": {
+            "defaultValue": "nsg-app",
+            "type": "String"
+        },
+        "networkSecurityGroups_nsg_web_name": {
+            "defaultValue": "nsg-web",
+            "type": "String"
+        },
+        "publicIPAddresses_pip_bastion_name": {
+            "defaultValue": "pip-bastion",
+            "type": "String"
+        },
+        "storageAccounts_p3storagedb8907_name": {
+            "defaultValue": "[concat('p3storage', uniqueString(resourceGroup().id))]",
+            "type": "String"
+        },
+        "applicationSecurityGroups_asg_db_name": {
+            "defaultValue": "asg-db",
+            "type": "String"
+        },
+        "applicationSecurityGroups_asg_app_name": {
+            "defaultValue": "asg-app",
+            "type": "String"
+        },
+        "applicationSecurityGroups_asg_web_name": {
+            "defaultValue": "asg-web",
+            "type": "String"
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "Admin password for the four Linux VMs. Never commit a real value."
+            }
+        },
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/applicationSecurityGroups",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('applicationSecurityGroups_asg_app_name')]",
+            "location": "[parameters('location')]",
+            "properties": {},
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/applicationSecurityGroups",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('applicationSecurityGroups_asg_db_name')]",
+            "location": "[parameters('location')]",
+            "properties": {},
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/applicationSecurityGroups",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('applicationSecurityGroups_asg_web_name')]",
+            "location": "[parameters('location')]",
+            "properties": {},
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('publicIPAddresses_pip_bastion_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "zones": [
+                "2",
+                "1",
+                "3"
+            ],
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": [],
+                "ddosSettings": {
+                    "protectionMode": "VirtualNetworkInherited"
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('publicIPAddresses_pip_web_p3_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "zones": [
+                "2",
+                "1",
+                "3"
+            ],
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": [],
+                "ddosSettings": {
+                    "protectionMode": "VirtualNetworkInherited"
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.RecoveryServices/vaults",
+            "apiVersion": "2026-07-01",
+            "name": "[parameters('vaults_vm_db_backup_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "RS0",
+                "tier": "Standard"
+            },
+            "properties": {
+                "securitySettings": {
+                    "softDeleteSettings": {
+                        "softDeleteRetentionPeriodInDays": 14,
+                        "softDeleteState": "Enabled",
+                        "enhancedSecurityState": "Enabled"
+                    },
+                    "sourceScanConfiguration": {
+                        "state": "Disabled"
+                    }
+                },
+                "redundancySettings": {
+                    "standardTierStorageRedundancy": "GeoRedundant",
+                    "crossRegionRestore": "Disabled"
+                },
+                "regionOfChoiceSettings": {
+                    "status": "Disabled"
+                },
+                "publicNetworkAccess": "Enabled",
+                "restoreSettings": {
+                    "crossSubscriptionRestoreSettings": {
+                        "crossSubscriptionRestoreState": "Enabled"
+                    }
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2026-04-01",
+            "name": "[parameters('virtualMachines_vm_app_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_app298_name'))]"
+            ],
+            "zones": [
+                "2"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v6"
+                },
+                "additionalCapabilities": {
+                    "hibernationEnabled": false
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "canonical",
+                        "offer": "ubuntu-24_04-lts",
+                        "sku": "server",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_vm_app_name'), '_OsDisk_1_258a0cac515245d9b76852dc0414a925')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_vm_app_name'), '_OsDisk_1_258a0cac515245d9b76852dc0414a925'))]"
+                        },
+                        "deleteOption": "Delete",
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": [],
+                    "diskControllerType": "NVMe"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_vm_app_name')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "ImageDefault",
+                            "assessmentMode": "ImageDefault"
+                        },
+                        "enableVMAgentPlatformUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true,
+                    "adminUsername": "azureuser",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_app298_name'))]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2026-04-01",
+            "name": "[parameters('virtualMachines_vm_db_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_db22_name'))]"
+            ],
+            "zones": [
+                "1"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v6"
+                },
+                "additionalCapabilities": {
+                    "hibernationEnabled": false
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "canonical",
+                        "offer": "ubuntu-24_04-lts",
+                        "sku": "server",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_vm_db_name'), '_OsDisk_1_9f4d951005dd451581ee224adab0e82b')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_vm_db_name'), '_OsDisk_1_9f4d951005dd451581ee224adab0e82b'))]"
+                        },
+                        "deleteOption": "Delete",
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[concat(parameters('virtualMachines_vm_db_name'), '_databasedisk')]",
+                            "createOption": "Empty",
+                            "caching": "ReadOnly",
+                            "writeAcceleratorEnabled": false,
+                            "managedDisk": {
+                                "storageAccountType": "StandardSSD_LRS",
+                                "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_vm_db_name'), '_databasedisk'))]"
+                            },
+                            "deleteOption": "Detach",
+                            "diskSizeGB": 4,
+                            "toBeDetached": false
+                        }
+                    ],
+                    "diskControllerType": "NVMe"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_vm_db_name')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "ImageDefault",
+                            "assessmentMode": "ImageDefault"
+                        },
+                        "enableVMAgentPlatformUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true,
+                    "adminUsername": "azureuser",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_vm_db22_name'))]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2026-04-01",
+            "name": "[parameters('virtualMachines_web_vm1_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web_vm1462_name'))]"
+            ],
+            "zones": [
+                "1"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v6"
+                },
+                "additionalCapabilities": {
+                    "hibernationEnabled": false
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "canonical",
+                        "offer": "ubuntu-24_04-lts",
+                        "sku": "server",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_web_vm1_name'), '_OsDisk_1_d99941758d394fbea7566b8bd5f80944')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_web_vm1_name'), '_OsDisk_1_d99941758d394fbea7566b8bd5f80944'))]"
+                        },
+                        "deleteOption": "Delete"
+                    },
+                    "dataDisks": [],
+                    "diskControllerType": "NVMe"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_web_vm1_name')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "ImageDefault",
+                            "assessmentMode": "ImageDefault"
+                        },
+                        "enableVMAgentPlatformUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true,
+                    "adminUsername": "azureuser",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web_vm1462_name'))]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2026-04-01",
+            "name": "[parameters('virtualMachines_web_vm2_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web_vm2475_name'))]"
+            ],
+            "zones": [
+                "2"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D2s_v6"
+                },
+                "additionalCapabilities": {
+                    "hibernationEnabled": false
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "canonical",
+                        "offer": "ubuntu-24_04-lts",
+                        "sku": "server",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[concat(parameters('virtualMachines_web_vm2_name'), '_disk1_943b26d3d43048f9af398bf133187fb5')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "StandardSSD_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_web_vm2_name'), '_disk1_943b26d3d43048f9af398bf133187fb5'))]"
+                        },
+                        "deleteOption": "Delete",
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": [],
+                    "diskControllerType": "NVMe"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_web_vm2_name')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "ImageDefault",
+                            "assessmentMode": "ImageDefault"
+                        },
+                        "enableVMAgentPlatformUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true,
+                    "adminUsername": "azureuser",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web_vm2475_name'))]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('loadBalancers_internal_lb_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_P3_Vnet_name'))]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[parameters('loadBalancers_internal_lb_name')]",
+                        "properties": {
+                            "privateIPAddress": "10.30.2.10",
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_P3_Vnet_name'), 'snet_app')]"
+                            },
+                            "privateIPAddressVersion": "IPv4"
+                        },
+                        "zones": [
+                            "2",
+                            "1",
+                            "3"
+                        ]
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[concat(parameters('loadBalancers_internal_lb_name'), '-pool')]",
+                        "properties": {}
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "[concat(parameters('loadBalancers_internal_lb_name'), '-rule')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_internal_lb_name')), concat('/frontendIPConfigurations/', parameters('loadBalancers_internal_lb_name')))]"
+                            },
+                            "frontendPort": 8080,
+                            "backendPort": 8080,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "enableConnectionTracking": false,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_internal_lb_name'), concat(parameters('loadBalancers_internal_lb_name'), '-pool'))]"
+                            },
+                            "backendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_internal_lb_name'), concat(parameters('loadBalancers_internal_lb_name'), '-pool'))]"
+                                }
+                            ],
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_internal_lb_name')), concat('/probes/', parameters('loadBalancers_internal_lb_name'), '-app-healthprobe'))]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "[concat(parameters('loadBalancers_internal_lb_name'), '-app-healthprobe')]",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 8080,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 1,
+                            "probeThreshold": 1,
+                            "noHealthyBackendsBehavior": "AllProbedDown"
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [],
+                "inboundNatPools": []
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('loadBalancers_plb_p3_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_pip_web_p3_name'))]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "fe-web",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_pip_web_p3_name'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "bp-web",
+                        "properties": {}
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "rule-http",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_plb_p3_name')), '/frontendIPConfigurations/fe-web')]"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "enableConnectionTracking": false,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_plb_p3_name'), 'bp-web')]"
+                            },
+                            "backendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_plb_p3_name'), 'bp-web')]"
+                                }
+                            ],
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_plb_p3_name')), '/probes/probe-http')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "probe-http",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 1,
+                            "probeThreshold": 1,
+                            "noHealthyBackendsBehavior": "AllProbedDown"
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [],
+                "inboundNatPools": []
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/natGateways",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('natGateways_NAT_project3_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_nat_pip_name'))]"
+            ],
+            "sku": {
+                "name": "StandardV2",
+                "tier": "Regional"
+            },
+            "properties": {
+                "idleTimeoutInMinutes": 4,
+                "publicIpAddresses": [
+                    {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_nat_pip_name'))]"
+                    }
+                ],
+                "nat64": "Disabled"
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('networkSecurityGroups_nsg_web_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]"
+            ],
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allow-http",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "Internet",
+                            "priority": 100,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": [],
+                            "destinationApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "allow-bastion",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "10.30.4.0/26",
+                            "priority": 120,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": [],
+                            "destinationApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('publicIPAddresses_nat_pip_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "sku": {
+                "name": "StandardV2",
+                "tier": "Regional"
+            },
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": [],
+                "ddosSettings": {
+                    "protectionMode": "VirtualNetworkInherited"
+                }
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+            "apiVersion": "2026-07-01",
+            "name": "[concat(parameters('vaults_vm_db_backup_name'), '/DefaultPolicy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaults_vm_db_backup_name'))]"
+            ],
+            "properties": {
+                "backupManagementType": "AzureIaasVM",
+                "policyType": "V1",
+                "instantRPDetails": {},
+                "schedulePolicy": {
+                    "schedulePolicyType": "SimpleSchedulePolicy",
+                    "scheduleRunFrequency": "Daily",
+                    "scheduleRunTimes": [
+                        "2026-11-18T08:00:00Z"
+                    ],
+                    "scheduleWeeklyFrequency": 0
+                },
+                "retentionPolicy": {
+                    "retentionPolicyType": "LongTermRetentionPolicy",
+                    "dailySchedule": {
+                        "retentionTimes": [
+                            "2026-11-18T08:00:00Z"
+                        ],
+                        "retentionDuration": {
+                            "count": 30,
+                            "durationType": "Days"
+                        }
+                    }
+                },
+                "instantRpRetentionRangeInDays": 2,
+                "timeZone": "UTC"
+            }
+        },
+        {
+            "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+            "apiVersion": "2026-07-01",
+            "name": "[concat(parameters('vaults_vm_db_backup_name'), '/EnhancedPolicy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaults_vm_db_backup_name'))]"
+            ],
+            "properties": {
+                "backupManagementType": "AzureIaasVM",
+                "policyType": "V2",
+                "instantRPDetails": {},
+                "schedulePolicy": {
+                    "schedulePolicyType": "SimpleSchedulePolicyV2",
+                    "scheduleRunFrequency": "Hourly",
+                    "hourlySchedule": {
+                        "interval": 4,
+                        "scheduleWindowStartTime": "2026-11-18T08:00:00Z",
+                        "scheduleWindowDuration": 12
+                    }
+                },
+                "retentionPolicy": {
+                    "retentionPolicyType": "LongTermRetentionPolicy",
+                    "dailySchedule": {
+                        "retentionTimes": [
+                            "2026-11-18T08:00:00Z"
+                        ],
+                        "retentionDuration": {
+                            "count": 30,
+                            "durationType": "Days"
+                        }
+                    }
+                },
+                "instantRpRetentionRangeInDays": 2,
+                "timeZone": "UTC"
+            }
+        },
+        {
+            "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+            "apiVersion": "2026-07-01",
+            "name": "[concat(parameters('vaults_vm_db_backup_name'), '/EnhancedPolicy-mwl9exne')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaults_vm_db_backup_name'))]"
+            ],
+            "properties": {
+                "backupManagementType": "AzureIaasVM",
+                "policyType": "V2",
+                "instantRPDetails": {},
+                "schedulePolicy": {
+                    "schedulePolicyType": "SimpleSchedulePolicyV2",
+                    "scheduleRunFrequency": "Weekly",
+                    "weeklySchedule": {
+                        "scheduleRunDays": [
+                            "Sunday"
+                        ],
+                        "scheduleRunTimes": [
+                            "2026-11-18T12:00:00Z"
+                        ]
+                    }
+                },
+                "retentionPolicy": {
+                    "retentionPolicyType": "LongTermRetentionPolicy",
+                    "weeklySchedule": {
+                        "daysOfTheWeek": [
+                            "Sunday"
+                        ],
+                        "retentionTimes": [
+                            "2026-11-18T12:00:00Z"
+                        ],
+                        "retentionDuration": {
+                            "count": 12,
+                            "durationType": "Weeks"
+                        }
+                    }
+                },
+                "instantRpRetentionRangeInDays": 7,
+                "timeZone": "UTC"
+            }
+        },
+        {
+            "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+            "apiVersion": "2026-07-01",
+            "name": "[concat(parameters('vaults_vm_db_backup_name'), '/HourlyLogBackup')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaults_vm_db_backup_name'))]"
+            ],
+            "properties": {
+                "backupManagementType": "AzureWorkload",
+                "workLoadType": "SQLDataBase",
+                "settings": {
+                    "timeZone": "UTC",
+                    "issqlcompression": false,
+                    "isCompression": false
+                },
+                "subProtectionPolicy": [
+                    {
+                        "policyType": "Full",
+                        "schedulePolicy": {
+                            "schedulePolicyType": "SimpleSchedulePolicy",
+                            "scheduleRunFrequency": "Daily",
+                            "scheduleRunTimes": [
+                                "2026-11-18T08:00:00Z"
+                            ],
+                            "scheduleWeeklyFrequency": 0
+                        },
+                        "retentionPolicy": {
+                            "retentionPolicyType": "LongTermRetentionPolicy",
+                            "dailySchedule": {
+                                "retentionTimes": [
+                                    "2026-11-18T08:00:00Z"
+                                ],
+                                "retentionDuration": {
+                                    "count": 30,
+                                    "durationType": "Days"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "policyType": "Log",
+                        "schedulePolicy": {
+                            "schedulePolicyType": "LogSchedulePolicy",
+                            "scheduleFrequencyInMins": 60
+                        },
+                        "retentionPolicy": {
+                            "retentionPolicyType": "SimpleRetentionPolicy",
+                            "retentionDuration": {
+                                "count": 30,
+                                "durationType": "Days"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.RecoveryServices/vaults/replicationAlertSettings",
+            "apiVersion": "2026-07-01",
+            "name": "[concat(parameters('vaults_vm_db_backup_name'), '/defaultAlertSetting')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaults_vm_db_backup_name'))]"
+            ],
+            "properties": {
+                "sendToOwners": "DoNotSend",
+                "customEmailAddresses": []
+            }
+        },
+        {
+            "type": "Microsoft.RecoveryServices/vaults/replicationVaultSettings",
+            "apiVersion": "2026-07-01",
+            "name": "[concat(parameters('vaults_vm_db_backup_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaults_vm_db_backup_name'))]"
+            ],
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2026-06-01",
+            "name": "[parameters('storageAccounts_p3storagedb8907_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_P3_Vnet_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "allowCrossTenantDelegationSas": false,
+                "dualStackEndpointPreference": {
+                    "publishIpv6Endpoint": false
+                },
+                "dnsEndpointType": "Standard",
+                "defaultToOAuthAuthentication": false,
+                "publicNetworkAccess": "Enabled",
+                "allowCrossTenantReplication": false,
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": true,
+                "networkAcls": {
+                    "ipv6Rules": [],
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_P3_Vnet_name'), 'snet_app')]",
+                            "action": "Allow"
+                        }
+                    ],
+                    "ipRules": [],
+                    "defaultAction": "Deny"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "requireInfrastructureEncryption": false,
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2026-06-01",
+            "name": "[concat(parameters('storageAccounts_p3storagedb8907_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_p3storagedb8907_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "staticWebsite": {
+                    "enabled": false
+                },
+                "containerDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 7
+                },
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "allowPermanentDelete": false,
+                    "enabled": true,
+                    "days": 7
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2026-06-01",
+            "name": "[concat(parameters('storageAccounts_p3storagedb8907_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_p3storagedb8907_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {
+                        "encryptionInTransit": {
+                            "required": true
+                        }
+                    }
+                },
+                "cors": {
+                    "corsRules": []
+                },
+                "shareDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 7
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2026-06-01",
+            "name": "[concat(parameters('storageAccounts_p3storagedb8907_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_p3storagedb8907_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2026-06-01",
+            "name": "[concat(parameters('storageAccounts_p3storagedb8907_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_p3storagedb8907_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/bastionHosts",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('bastionHosts_project3_bastion_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_pip_bastion_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_P3_Vnet_name'))]"
+            ],
+            "sku": {
+                "name": "Basic"
+            },
+            "zones": [
+                "2",
+                "1",
+                "3"
+            ],
+            "properties": {
+                "scaleUnits": 2,
+                "enableTunneling": false,
+                "enableIpConnect": false,
+                "disableCopyPaste": false,
+                "enableShareableLink": false,
+                "enableKerberos": false,
+                "enableSessionRecording": false,
+                "enablePrivateOnlyBastion": false,
+                "ipConfigurations": [
+                    {
+                        "name": "IpConf",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_pip_bastion_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_P3_Vnet_name'), 'AzureBastionSubnet')]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('networkInterfaces_vm_db22_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_P3_Vnet_name'))]",
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_db_name'))]"
+            ],
+            "kind": "Regular",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.30.3.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_P3_Vnet_name'), 'snet_db')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4",
+                            "applicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_db_name'))]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "nicType": "Standard",
+                "auxiliaryMode": "None",
+                "auxiliarySku": "None"
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('networkSecurityGroups_nsg_app_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]",
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]"
+            ],
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allow-web-to-app",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8080",
+                            "priority": 100,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": [],
+                            "sourceApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]"
+                                }
+                            ],
+                            "destinationApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "allow-bastion-app",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "10.30.4.0/26",
+                            "priority": 120,
+                            "description": "Allow SSH from Azure Bastion subnet",
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": [],
+                            "destinationApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "Deny-Vnet",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "VirtualNetwork",
+                            "destinationAddressPrefix": "*",
+                            "priority": 4000,
+                            "protocol": "*",
+                            "access": "Deny",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Allow-LB",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8080",
+                            "sourceAddressPrefix": "AzureLoadBalancer",
+                            "priority": 1000,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": [],
+                            "destinationApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('networkSecurityGroups_nsg_db_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]",
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_db_name'))]"
+            ],
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allow-app-to-db",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "5432",
+                            "priority": 100,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": [],
+                            "sourceApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]"
+                                }
+                            ],
+                            "destinationApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_db_name'))]"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "Deny-Vnet",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "VirtualNetwork",
+                            "destinationAddressPrefix": "*",
+                            "priority": 2000,
+                            "protocol": "*",
+                            "access": "Deny",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "allow-bastion",
+                        "properties": {
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "10.30.4.0/26",
+                            "priority": 120,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": [],
+                            "destinationApplicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_db_name'))]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2026-06-01",
+            "name": "[concat(parameters('storageAccounts_p3storagedb8907_name'), '/default/casefiles')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_p3storagedb8907_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_p3storagedb8907_name'))]"
+            ],
+            "properties": {
+                "accessTier": "TransactionOptimized",
+                "shareQuota": 102400,
+                "enabledProtocols": "SMB"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('networkInterfaces_vm_app298_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_P3_Vnet_name'))]",
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_internal_lb_name'))]"
+            ],
+            "kind": "Regular",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.30.2.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_P3_Vnet_name'), 'snet_app')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4",
+                            "applicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_app_name'))]"
+                                }
+                            ],
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_internal_lb_name'), concat(parameters('loadBalancers_internal_lb_name'), '-pool'))]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "nicType": "Standard",
+                "auxiliaryMode": "None",
+                "auxiliarySku": "None"
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('networkInterfaces_web_vm1462_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_P3_Vnet_name'))]",
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_plb_p3_name'))]"
+            ],
+            "kind": "Regular",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.30.1.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_P3_Vnet_name'), 'snet_web')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4",
+                            "applicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]"
+                                }
+                            ],
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_plb_p3_name'), 'bp-web')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "nicType": "Standard",
+                "auxiliaryMode": "None",
+                "auxiliarySku": "None"
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('networkInterfaces_web_vm2475_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_P3_Vnet_name'))]",
+                "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_plb_p3_name'))]"
+            ],
+            "kind": "Regular",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.30.1.5",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_P3_Vnet_name'), 'snet_web')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4",
+                            "applicationSecurityGroups": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/applicationSecurityGroups', parameters('applicationSecurityGroups_asg_web_name'))]"
+                                }
+                            ],
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_plb_p3_name'), 'bp-web')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": false,
+                "disableTcpStateTracking": false,
+                "nicType": "Standard",
+                "auxiliaryMode": "None",
+                "auxiliarySku": "None"
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2025-09-01",
+            "name": "[parameters('virtualNetworks_P3_Vnet_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_web_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_db_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_app_name'))]",
+                "[resourceId('Microsoft.Network/natGateways', parameters('natGateways_NAT_project3_name'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.30.0.0/16"
+                    ]
+                },
+                "encryption": {
+                    "enabled": false,
+                    "enforcement": "AllowUnencrypted"
+                },
+                "privateEndpointVNetPolicies": "Disabled",
+                "subnets": [
+                    {
+                        "name": "snet_web",
+                        "properties": {
+                            "addressPrefixes": [
+                                "10.30.1.0/24"
+                            ],
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_web_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "defaultOutboundAccess": false
+                        }
+                    },
+                    {
+                        "name": "snet_db",
+                        "properties": {
+                            "addressPrefixes": [
+                                "10.30.3.0/24"
+                            ],
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_db_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "defaultOutboundAccess": false
+                        }
+                    },
+                    {
+                        "name": "snet_app",
+                        "properties": {
+                            "addressPrefixes": [
+                                "10.30.2.0/24"
+                            ],
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_nsg_app_name'))]"
+                            },
+                            "natGateway": {
+                                "id": "[resourceId('Microsoft.Network/natGateways', parameters('natGateways_NAT_project3_name'))]"
+                            },
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "eastus",
+                                        "westus",
+                                        "westus3"
+                                    ]
+                                }
+                            ],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "defaultOutboundAccess": false
+                        }
+                    },
+                    {
+                        "name": "AzureBastionSubnet",
+                        "properties": {
+                            "addressPrefixes": [
+                                "10.30.4.0/26"
+                            ],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "defaultOutboundAccess": false
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false
+            },
+            "tags": {
+                "project": "project_3",
+                "owner": "lab-owner",
+                "expires": "YYYY-MM-DD",
+                "environment": "lab",
+                "purpose": "az104-hands-on"
+            }
+        }
+    ]
+}
