@@ -34,7 +34,9 @@ A law firm is moving its case-management ERP to Azure. Staff reach the web site 
 | R7 | The app tier is load balanced internally, with health checks | **Internal load balancer** + health probe |
 | R8 | Shared case files are reachable only from the app subnet | **Azure Files** + storage firewall + **service endpoint** |
 | R9 | The database VM is backed up | **Recovery Services vault** + backup policy |
-| R10 | App VMs can reach the internet outbound without public IPs | **NAT gateway** on the app subnet |
+| R10 | App VMs can reach the internet outbound without public IPs (in this lab: to download packages such as cifs-utilsandapt updates) | **NAT gateway** on the app subnet |
+
+**Why the NAT gateway is here:** it is outbound-only. The app VM has no public IP, so without it the VM cannot download the packages it needs (for example cifs-utils to mount the Azure Files share). Nothing from the internet can reach the app tier through it. It bills by the hour, so delete it at teardown. If you skip it, install the packages another way or skip the file-share mount test.
 
 ## Architecture
 
