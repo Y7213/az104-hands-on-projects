@@ -1,6 +1,10 @@
 # Project 2: Manufacturer Hub-and-Spoke Network
 
-> Two plants, a head office and a hub. Plants talk only through the hub, the operational-technology (OT) subnets cannot reach the internet, head office joins over an encrypted VPN, names resolve everywhere, and faults are diagnosed from the portal without logging in to a VM.
+> Two plants, a head office and a hub. Plants talk only through the hub, the operational-technology (OT) subnets cannot reach the internet, head office joins over an encrypted VPN, names resolve everywhere, and faults are diagnosed from the portal without logging in to a VM. 
+>
+> 
+
+images/00-architecture-resource-visualizer.jpg 
 
 ![Resource group with the four VNets](images/01-resource-group-four-vnets.png)
 
