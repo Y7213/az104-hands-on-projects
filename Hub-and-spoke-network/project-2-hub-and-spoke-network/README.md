@@ -4,7 +4,7 @@
 >
 > 
 
-images/00-architecture-resource-visualizer.jpg 
+![Architecture exported from the Azure resource visualizer](images/00-architecture-resource-visualizer.jpg)
 
 ![Resource group with the four VNets](images/01-resource-group-four-vnets.png)
 
