@@ -41,7 +41,7 @@ A manufacturer runs two plants and a head office. Each plant has a server subnet
 
 Exported from the Azure resource visualizer after the build. It shows the final state, including the orphan `ip-vpn` public IP.
 
-![Architecture exported from the Azure resource visualizer](images/00-architecture-resource-visualizer.jpg)
+
 
 The same design as a simplified diagram:
 
